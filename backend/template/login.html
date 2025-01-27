@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Login</h1>
+    <form id="loginForm">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Login</button>
+    </form>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Collect data from the form
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+            };
+
+            // Send data to Django backend
+            axios.post('http://localhost:8000/api/login/', formData)
+                .then(function (response) {
+                    alert('Login successful!');
+                    console.log(response.data); // You can handle the response as needed
+                })
+                .catch(function (error) {
+                    alert('Error during login');
+                    console.log(error);
+                });
+        });
+    </script>
+</body>
+</html>

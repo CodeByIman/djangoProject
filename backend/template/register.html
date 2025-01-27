@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Registration</title>
+</head>
+<body>
+    <h1>User Registration</h1>
+    <form id="registerForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br><br>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            console.log('Attempting to register with the following data:', { username, email, password });
+
+            // Sending the data to your backend API
+            fetch('http://127.0.0.1:8000/api/register/', {  // Ensure the endpoint matches your Django URL
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password,
+                }),
+            })
+            .then(response => {
+                console.log('Response received:', response);
+                
+                if (!response.ok) {
+                    console.error('Error response from server:', response);
+                    return response.text().then(text => { throw new Error(text) });
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                console.log('Data received from the server:', data);
+
+                // Display the success message
+                if (data.message) {
+                    document.getElementById('message').innerText = data.message;
+                } else {
+                    document.getElementById('message').innerText = 'Unexpected response format: ' + JSON.stringify(data);
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch operation:', error);
+                document.getElementById('message').innerText = 'Error: ' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
