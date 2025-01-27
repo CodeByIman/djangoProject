@@ -28,40 +28,27 @@
                 password: document.getElementById('password').value,
             };
 
-            // Log the form data for debugging
-            console.log('Form data:', formData);
-
             // Send data to Django backend
             axios.post('http://localhost:8000/api/login/', formData)
                 .then(function (response) {
                     // Successful response
                     console.log('Login successful! Response:', response.data);
-                    alert('Login successful!');
-                    // Handle the response (e.g., redirect to another page or store the token)
+                    const accessToken = response.data.access; // Assuming the token is in response.data.access
+
+                    // Store the token in localStorage (or sessionStorage)
+                    localStorage.setItem('accessToken', accessToken);
+
+                    // Redirect to create.html
+                    window.location.href = 'create.html';
                 })
                 .catch(function (error) {
-                    // Error handling
+                    // Handle errors
                     console.log('Error during login:', error);
 
-                    if (error.response) {
-                        // Log the full response in case of server-side errors (e.g., 401 Unauthorized)
-                        console.error('Response data:', error.response.data);
-                        console.error('Response status:', error.response.status);
-                        console.error('Response headers:', error.response.headers);
-
-                        if (error.response.status === 401) {
-                            alert('Unauthorized: Invalid credentials!');
-                        } else {
-                            alert('Error: ' + error.response.status);
-                        }
-                    } else if (error.request) {
-                        // If the request was made but no response was received
-                        console.error('Request data:', error.request);
-                        alert('No response from the server.');
+                    if (error.response && error.response.status === 401) {
+                        alert('Unauthorized: Invalid credentials!');
                     } else {
-                        // General error handling
-                        console.error('Error message:', error.message);
-                        alert('An error occurred: ' + error.message);
+                        alert('An error occurred.');
                     }
                 });
         });

@@ -109,15 +109,10 @@ class ListingCreateView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
-        if not getattr(request.user, "is_seller", False):  # Check seller attribute
-            return Response(
-                {"error": "Only sellers can create listings"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
+        # Retirer la condition vérifiant si l'utilisateur est un vendeur
         serializer = ListingCreateSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(seller=request.user)
+            serializer.save(seller=request.user)  # L'utilisateur qui fait la requête devient le vendeur
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

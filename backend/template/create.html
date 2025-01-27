@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Listing</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Create a Listing</h1>
+    <form id="createForm">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" required><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" required></textarea><br><br>
+
+        <label for="price">Price:</label><br>
+        <input type="number" id="price" name="price" required><br><br>
+
+        <label for="property_type">Property Type:</label><br>
+        <select id="property_type" name="property_type" required>
+            <option value="room">Room</option>
+            <option value="apartment">Apartment</option>
+            <option value="house">House</option>
+        </select><br><br>
+
+        <label for="location">Location:</label><br>
+        <input type="text" id="location" name="location" required><br><br>
+
+        <button type="submit">Create Listing</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Retrieve the token from localStorage
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (!accessToken) {
+                alert('You are not logged in. Redirecting to login page...');
+                window.location.href = 'login.html';
+            }
+
+            document.getElementById('createForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Collect data from the form
+                const formData = {
+                    title: document.getElementById('title').value,
+                    description: document.getElementById('description').value,
+                    price: document.getElementById('price').value,
+                    property_type: document.getElementById('property_type').value,
+                    location: document.getElementById('location').value,
+                };
+
+                // Send data to Django backend with the token
+                axios.post('http://localhost:8000/listings/create/', formData, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    }
+                })
+                .then(function (response) {
+                    // Successful response
+                    console.log('Listing created! Response:', response.data);
+                    alert('Listing created successfully!');
+                })
+                .catch(function (error) {
+                    // Handle errors
+                    console.log('Error during listing creation:', error);
+
+                    if (error.response && error.response.status === 401) {
+                        alert('Unauthorized: Please log in again.');
+                        window.location.href = 'login.html';
+                    } else {
+                        alert('An error occurred.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
