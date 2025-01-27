@@ -28,15 +28,41 @@
                 password: document.getElementById('password').value,
             };
 
+            // Log the form data for debugging
+            console.log('Form data:', formData);
+
             // Send data to Django backend
             axios.post('http://localhost:8000/api/login/', formData)
                 .then(function (response) {
+                    // Successful response
+                    console.log('Login successful! Response:', response.data);
                     alert('Login successful!');
-                    console.log(response.data); // You can handle the response as needed
+                    // Handle the response (e.g., redirect to another page or store the token)
                 })
                 .catch(function (error) {
-                    alert('Error during login');
-                    console.log(error);
+                    // Error handling
+                    console.log('Error during login:', error);
+
+                    if (error.response) {
+                        // Log the full response in case of server-side errors (e.g., 401 Unauthorized)
+                        console.error('Response data:', error.response.data);
+                        console.error('Response status:', error.response.status);
+                        console.error('Response headers:', error.response.headers);
+
+                        if (error.response.status === 401) {
+                            alert('Unauthorized: Invalid credentials!');
+                        } else {
+                            alert('Error: ' + error.response.status);
+                        }
+                    } else if (error.request) {
+                        // If the request was made but no response was received
+                        console.error('Request data:', error.request);
+                        alert('No response from the server.');
+                    } else {
+                        // General error handling
+                        console.error('Error message:', error.message);
+                        alert('An error occurred: ' + error.message);
+                    }
                 });
         });
     </script>
