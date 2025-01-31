@@ -7,7 +7,12 @@
     <style>
         :root {
             --primary-color: #2563eb;
+            --secondary-color: #ff6b6b;
             --background-color: #f3f4f6;
+            --accent-color: #4caf50;
+            --text-color: #333;
+            --card-background: #ffffff;
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -19,68 +24,99 @@
         body {
             font-family: 'Segoe UI', sans-serif;
             background-color: var(--background-color);
-            padding: 20px;
+            color: var(--text-color);
+            padding-top: 80px; /* Pour éviter que le contenu soit caché sous la barre de navigation */
         }
 
-        .search-container {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        /* Barre de navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--card-background);
+            box-shadow: 0 4px 8px var(--shadow-color);
+            padding: 10px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .filters-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        .navbar .filters-form {
+            display: flex;
             gap: 15px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            width: 100%;
         }
 
-        .filter-group {
+        .navbar .filter-group {
             display: flex;
             flex-direction: column;
+            flex: 1;
+            min-width: 150px;
         }
 
-        input, select {
+        .navbar .filter-group label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+
+        .navbar input, .navbar select {
             padding: 8px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-top: 5px;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        button {
+        .navbar input:focus, .navbar select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
+            outline: none;
+        }
+
+        .navbar button {
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: opacity 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.3s;
+            align-self: flex-end;
         }
 
-        button:hover {
-            opacity: 0.9;
+        .navbar button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
         }
 
+        /* Contenu principal */
         .listings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             max-width: 1200px;
             margin: 30px auto;
+            padding: 0 20px;
         }
 
         .listing-card {
-            background: white;
-            border-radius: 8px;
+            background: var(--card-background);
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
 
         .listing-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 8px 16px var(--shadow-color);
         }
 
         .listing-image {
@@ -90,33 +126,70 @@
         }
 
         .listing-content {
-            padding: 15px;
+            padding: 20px;
+        }
+
+        .listing-content h3 {
+            font-size: 1.4em;
+            margin-bottom: 10px;
+            color: var(--primary-color);
         }
 
         .listing-price {
-            color: var(--primary-color);
+            color: var(--accent-color);
             font-size: 1.4em;
             font-weight: bold;
             margin: 10px 0;
+        }
+
+        .listing-content button {
+            background: var(--secondary-color);
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .listing-content button:hover {
+            background: var(--primary-color);
         }
 
         .error-message {
             color: #dc2626;
             text-align: center;
             padding: 20px;
+            font-size: 1.2em;
         }
 
         .logout-btn {
             display: block;
             margin: 20px auto;
-            background-color: #dc2626;
-            padding: 8px 16px;
-            border-radius: 5px;
+            background-color: var(--secondary-color);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+            border: none;
+            color: white;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <div class="search-container">
+    <!-- Barre de navigation -->
+    <nav class="navbar">
         <form class="filters-form" id="searchForm">
             <div class="filter-group">
                 <label>Université:</label>
@@ -145,10 +218,12 @@
 
             <button type="submit">Rechercher</button>
         </form>
-    </div>
+    </nav>
 
+    <!-- Bouton de déconnexion -->
     <button class="logout-btn" onclick="logout()">Déconnexion</button>
 
+    <!-- Conteneur des annonces -->
     <div id="listingsContainer" class="listings-grid"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -157,12 +232,12 @@
         const container = document.getElementById('listingsContainer');
         const searchForm = document.getElementById('searchForm');
 
-        // ✅ Retrieve token from localStorage
+        // ✅ Récupérer le token depuis localStorage
         const accessToken = localStorage.getItem('accessToken');
 
         if (!accessToken) {
             alert('Vous devez être connecté pour voir les annonces.');
-            window.location.href = 'login.html'; // Redirect to login if no token
+            window.location.href = 'login.html'; // Rediriger vers la page de connexion si aucun token
         }
 
         async function loadListings(filters = {}) {
@@ -188,8 +263,8 @@
 
                 if (error.response && error.response.status === 401) {
                     alert("Session expirée. Veuillez vous reconnecter.");
-                    localStorage.removeItem('accessToken'); // Remove invalid token
-                    window.location.href = 'login.html'; // Redirect to login
+                    localStorage.removeItem('accessToken'); // Supprimer le token invalide
+                    window.location.href = 'login.html'; // Rediriger vers la page de connexion
                 } else {
                     container.innerHTML = `<div class="error-message">Une erreur s'est produite.</div>`;
                 }
@@ -199,7 +274,7 @@
         function displayListings(listings) {
             container.innerHTML = listings.map(listing => `
                 <div class="listing-card">
-                    <img src="${listing.images || 'placeholder.jpg'}" class="listing-image" alt="${listing.title}">
+                    <img src="image.jpg" class="listing-image" alt="${listing.title}">
                     <div class="listing-content">
                         <h3>${listing.title}</h3>
                         <div class="listing-price">${listing.price} €/mois</div>

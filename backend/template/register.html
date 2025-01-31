@@ -4,23 +4,121 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Registration</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Form Container */
+        #registerForm {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Input Fields */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            outline: none;
+        }
+
+        /* Button */
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        /* Message Display */
+        #message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        #message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 <body>
-    <h1>User Registration</h1>
-    <form id="registerForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br><br>
-        
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br><br>
-        
-        <button type="submit">Register</button>
-    </form>
+    <div id="registerFormContainer">
+        <h1>User Registration</h1>
+        <form id="registerForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            
+            <button type="submit">Register</button>
+        </form>
 
-    <div id="message"></div>
+        <div id="message"></div>
+    </div>
 
     <script>
         document.getElementById('registerForm').addEventListener('submit', function(event) {
@@ -48,7 +146,6 @@
                 console.log('Response received:', response);
                 
                 if (!response.ok) {
-                    console.error('Error response from server:', response);
                     return response.text().then(text => { throw new Error(text) });
                 }
                 
@@ -58,15 +155,15 @@
                 console.log('Data received from the server:', data);
 
                 // Display the success message
-                if (data.message) {
-                    document.getElementById('message').innerText = data.message;
-                } else {
-                    document.getElementById('message').innerText = 'Unexpected response format: ' + JSON.stringify(data);
-                }
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerText = data.message || 'Registration successful!';
+                messageDiv.className = 'success'; // Add success class for styling
             })
             .catch(error => {
                 console.error('Error during fetch operation:', error);
-                document.getElementById('message').innerText = 'Error: ' + error.message;
+                const messageDiv = document.getElementById('message');
+                messageDiv.innerText = 'Error: ' + error.message;
+                messageDiv.className = 'error'; // Add error class for styling
             });
         });
     </script>

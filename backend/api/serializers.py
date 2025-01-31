@@ -19,6 +19,7 @@ class UniversitySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'city']
 
 class ListingSerializer(serializers.ModelSerializer):
+    images = serializers.ImageField(use_url=True) 
     seller = UserSerializer(read_only=True)
     university = UniversitySerializer(read_only=True)
 
