@@ -6,189 +6,301 @@
     <title>Annonces Immobilières</title>
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #ff6b6b;
-            --background-color: #f3f4f6;
-            --accent-color: #4caf50;
-            --text-color: #333;
-            --card-background: #ffffff;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-        }
+    --primary-color: #FFD700; /* Vibrant yellow for accents */
+    --secondary-color: #FFC107; /* Slightly darker yellow for secondary actions */
+    --background-color: #5d82a7; /* Dark grey background */
+    --accent-color: #FFA500; /* Orange for prices */
+    --text-color: #E0E0E0; /* Light grey for text */
+    --card-background: #34495E; /* Slightly lighter dark grey for cards */
+    --shadow-color: rgba(0, 0, 0, 0.3); /* Dark shadow for depth */
+    --border-color: #444444; /* Subtle borders */
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            padding-top: 80px; /* Pour éviter que le contenu soit caché sous la barre de navigation */
-        }
+body {
+    font-family: 'Poppins', 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    padding-top: 80px; /* Space for the fixed navbar */
+}
 
-        /* Barre de navigation */
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: var(--card-background);
-            box-shadow: 0 4px 8px var(--shadow-color);
-            padding: 10px 20px;
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+/* Navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: var(--card-background);
+    box-shadow: 0 4px 8px var(--shadow-color);
+    padding: 10px 20px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        .navbar .filters-form {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            width: 100%;
-        }
+.navbar .filters-form {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    width: 100%;
+}
 
-        .navbar .filter-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 150px;
-        }
+.navbar .filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 150px;
+}
 
-        .navbar .filter-group label {
-            font-weight: 600;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
+.navbar .filter-group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
 
-        .navbar input, .navbar select {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
+.navbar input, .navbar select {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
 
-        .navbar input:focus, .navbar select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 5px rgba(37, 99, 235, 0.5);
-            outline: none;
-        }
+.navbar input:focus, .navbar select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    outline: none;
+}
 
-        .navbar button {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: background-color 0.3s, transform 0.3s;
-            align-self: flex-end;
-        }
+.navbar button {
+    background: var(--primary-color);
+    color: var(--background-color);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+    align-self: flex-end;
+}
 
-        .navbar button:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
-        }
+.navbar button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
 
-        /* Contenu principal */
-        .listings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
 
-        .listing-card {
-            background: var(--card-background);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px var(--shadow-color);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
+.modal-content {
+    background-color: var(--card-background);
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+}
 
-        .listing-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px var(--shadow-color);
-        }
+.close {
+    color: var(--text-color);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
 
-        .listing-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
+.close:hover {
+    color: var(--primary-color);
+}
 
-        .listing-content {
-            padding: 20px;
-        }
+#map {
+    height: 500px;
+    width: 100%;
+}
 
-        .listing-content h3 {
-            font-size: 1.4em;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
+#info {
+    margin-top: 10px;
+    font-size: 18px;
+}
 
-        .listing-price {
-            color: var(--accent-color);
-            font-size: 1.4em;
-            font-weight: bold;
-            margin: 10px 0;
-        }
+/* Main Content */
+.listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
 
-        .listing-content button {
-            background: var(--secondary-color);
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 14px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            color: white;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
+.listing-card {
+    background: var(--card-background);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px var(--shadow-color);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
 
-        .listing-content button:hover {
-            background: var(--primary-color);
-        }
+.listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px var(--shadow-color);
+}
 
-        .error-message {
-            color: #dc2626;
-            text-align: center;
-            padding: 20px;
-            font-size: 1.2em;
-        }
+.listing-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--primary-color); /* Accent border */
+}
 
-        .logout-btn {
-            display: block;
-            margin: 20px auto;
-            background-color: var(--secondary-color);
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s, transform 0.3s;
-            cursor: pointer;
-            border: none;
-            color: white;
-        }
+.listing-content {
+    padding: 20px;
+}
 
-        .logout-btn:hover {
-            background-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
+.listing-content h3 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.listing-price {
+    color: var(--accent-color);
+    font-size: 1.4em;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.listing-content button {
+    background: var(--secondary-color);
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--background-color);
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.listing-content button:hover {
+    background: var(--primary-color);
+}
+
+.error-message {
+    color: #FF6584; /* Soft pink for errors */
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+}
+
+.logout-btn {
+    display: block;
+    margin: 20px auto;
+    background-color: var(--secondary-color);
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.3s;
+    cursor: pointer;
+    border: none;
+    color: var(--background-color);
+}
+
+.logout-btn:hover {
+    background-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.hero {
+    position: relative;
+    width: 100%;
+    height: 400px; /* Adjust height as needed */
+    overflow: hidden;
+}
+
+.hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.search-bar {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border-radius: 25px;
+    padding: 5px;
+}
+
+.search-bar input {
+    border: none;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 20px 0 0 20px;
+    outline: none;
+    width: 300px;
+}
+
+.search-bar button {
+    border: none;
+    background: var(--primary-color);
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 0 20px 20px 0;
+    cursor: pointer;
+}
+
+.highlight {
+    color: var(--primary-color); /* Adjust highlight color */
+    text-decoration: underline;
+}
+
     </style>
+    <!-- Add Poppins font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body>
-    <!-- Barre de navigation -->
+    <!-- Navbar -->
     <nav class="navbar">
         <form class="filters-form" id="searchForm">
             <div class="filter-group">
@@ -216,21 +328,53 @@
                 <input type="number" id="maxPrice">
             </div>
 
+            <div class="filter-group">
+                <label>Emplacement:</label>
+                <input type="text" id="location" readonly>
+            </div>
+
+            <button type="button" onclick="openLocationPicker()">Choisir un emplacement</button>
             <button type="submit">Rechercher</button>
+            
         </form>
     </nav>
+    <div class="hero">
+        <img src="kk.jpg" alt="Hero Image" class="hero-image">
+        <div class="overlay">
+            <h1>Search, explore and book your <span class="highlight">room!</span></h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Search by city, university or property">
+                <button>🔍</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- Bouton de déconnexion -->
+    <!-- Location Picker Modal -->
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLocationPicker()">&times;</span>
+            <h2>Select a Location on the Map or Use Your Current Location</h2>
+            <button onclick="getCurrentLocation()">Use My Current Location</button>
+            <div id="map"></div>
+            <div id="info">Selected Location: <span id="location-info">None</span></div>
+            <button onclick="confirmLocation()">OK</button>
+        </div>
+    </div>
+
+    <!-- Logout Button -->
     <button class="logout-btn" onclick="logout()">Déconnexion</button>
 
-    <!-- Conteneur des annonces -->
+    <!-- Listings Container -->
     <div id="listingsContainer" class="listings-grid"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const API_URL = 'http://localhost:8000/listings/';
         const container = document.getElementById('listingsContainer');
         const searchForm = document.getElementById('searchForm');
+        const locationModal = document.getElementById('locationModal');
+        const locationInput = document.getElementById('location');
 
         // ✅ Récupérer le token depuis localStorage
         const accessToken = localStorage.getItem('accessToken');
@@ -238,6 +382,73 @@
         if (!accessToken) {
             alert('Vous devez être connecté pour voir les annonces.');
             window.location.href = 'login.html'; // Rediriger vers la page de connexion si aucun token
+        }
+
+        // Initialize the map
+        let map = L.map('map').setView([31.7917, -7.0926], 6); // Default center: Morocco
+
+        // Load OpenStreetMap (free tiles)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker = L.marker([31.7917, -7.0926], { draggable: true }).addTo(map);
+
+        function updateLocation(lat, lng) {
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    let locationName = data.display_name || "Unknown Location";
+                    document.getElementById("location-info").textContent = locationName;
+                })
+                .catch(() => {
+                    document.getElementById("location-info").textContent = "Error retrieving location";
+                });
+        }
+
+        map.on('click', function (e) {
+            let lat = e.latlng.lat;
+            let lng = e.latlng.lng;
+            marker.setLatLng([lat, lng]);
+            updateLocation(lat, lng);
+        });
+
+        marker.on('dragend', function (e) {
+            let position = marker.getLatLng();
+            updateLocation(position.lat, position.lng);
+        });
+
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        let lat = position.coords.latitude;
+                        let lng = position.coords.longitude;
+                        map.setView([lat, lng], 13);
+                        marker.setLatLng([lat, lng]);
+                        updateLocation(lat, lng);
+                    },
+                    () => {
+                        alert("Geolocation failed. Please enable location services.");
+                    }
+                );
+            } else {
+                alert("Your browser does not support geolocation.");
+            }
+        }
+
+        function openLocationPicker() {
+            locationModal.style.display = 'block';
+        }
+
+        function closeLocationPicker() {
+            locationModal.style.display = 'none';
+        }
+
+        function confirmLocation() {
+            const selectedLocation = document.getElementById("location-info").textContent;
+            locationInput.value = selectedLocation;
+            closeLocationPicker();
         }
 
         async function loadListings(filters = {}) {
@@ -295,7 +506,8 @@
                 university: document.getElementById('university').value,
                 property_type: document.getElementById('propertyType').value,
                 min_price: document.getElementById('minPrice').value,
-                max_price: document.getElementById('maxPrice').value
+                max_price: document.getElementById('maxPrice').value,
+                location: document.getElementById('location').value
             };
 
             await loadListings(filters);

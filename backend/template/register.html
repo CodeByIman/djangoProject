@@ -3,168 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Registration</title>
+    <title>Register</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* General Styles */
+        :root {
+            --primary-color: #FFD700;
+            --secondary-color: #FFC107;
+            --background-color: #5d82a7;
+            --accent-color: #FFA500;
+            --text-color: #E0E0E0;
+            --card-background: #34495E;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --border-color: #444444;
+        }
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
+            background-color: var(--background-color);
+            color: var(--text-color);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            margin: 0;
         }
-
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        /* Form Container */
-        #registerForm {
-            background: #fff;
+        .register-container {
+            background-color: var(--card-background);
             padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px var(--shadow-color);
             width: 100%;
             max-width: 400px;
         }
-
-        /* Input Fields */
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
+        .form-control {
+            border: 1px solid var(--border-color);
+            background-color: #ffffff;
+            color: #000000;
         }
-
-        input[type="text"],
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s, box-shadow 0.3s;
+        .form-control::placeholder {
+            color: #777777;
+            opacity: 1;
         }
-
-        input[type="text"]:focus,
-        input[type="email"]:focus,
-        input[type="password"]:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-            outline: none;
+        .form-label {
+            color: #ffffff;
         }
-
-        /* Button */
-        button[type="submit"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #007bff;
-            color: #fff;
+        .btn-primary {
+            background-color: var(--primary-color);
             border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.3s;
         }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-
-        /* Message Display */
-        #message {
-            margin-top: 20px;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        #message.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        #message.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
         }
     </style>
 </head>
 <body>
-    <div id="registerFormContainer">
-        <h1>User Registration</h1>
+    <div class="register-container">
+        <h1 class="text-center">Register</h1>
         <form id="registerForm">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-            
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-            
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-            
-            <button type="submit">Register</button>
-        </form>
+            <div class="mb-3">
+                <label for="username" class="form-label">Username:</label>
+                <input type="text" id="username" name="username" required class="form-control" placeholder="Enter your username">
+            </div>
 
-        <div id="message"></div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" id="email" name="email" required class="form-control" placeholder="Enter your email">
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password:</label>
+                <input type="password" id="password" name="password" required class="form-control" placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
     </div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+            };
 
-            console.log('Attempting to register with the following data:', { username, email, password });
-
-            // Sending the data to your backend API
-            fetch('http://127.0.0.1:8000/api/register/', {  // Ensure the endpoint matches your Django URL
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: username,
-                    email: email,
-                    password: password,
-                }),
-            })
-            .then(response => {
-                console.log('Response received:', response);
-                
-                if (!response.ok) {
-                    return response.text().then(text => { throw new Error(text) });
-                }
-                
-                return response.json();
-            })
-            .then(data => {
-                console.log('Data received from the server:', data);
-
-                // Display the success message
-                const messageDiv = document.getElementById('message');
-                messageDiv.innerText = data.message || 'Registration successful!';
-                messageDiv.className = 'success'; // Add success class for styling
-            })
-            .catch(error => {
-                console.error('Error during fetch operation:', error);
-                const messageDiv = document.getElementById('message');
-                messageDiv.innerText = 'Error: ' + error.message;
-                messageDiv.className = 'error'; // Add error class for styling
-            });
+            axios.post('http://localhost:8000/api/register/', formData)
+                .then(function (response) {
+                    console.log('Registration successful! Response:', response.data);
+                    alert('Registration successful!');
+                })
+                .catch(function (error) {
+                    console.log('Error during registration:', error);
+                    alert('An error occurred during registration.');
+                });
         });
     </script>
 </body>
