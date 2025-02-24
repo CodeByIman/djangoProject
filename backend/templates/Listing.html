@@ -6,7 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Listings</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <style>
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #map {
+            height: 300px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
 
@@ -25,7 +64,8 @@
             <input type="number" id="maxPriceFilter" class="form-control" placeholder="Max Price">
         </div>
         <div class="col-md-3">
-            <input type="text" id="locationFilter" class="form-control" placeholder="Location">
+            <input type="text" id="locationFilter" class="form-control" placeholder="Location" readonly>
+            <button type="button" class="btn btn-secondary mt-2" onclick="openLocationPicker()">Pick Location</button>
         </div>
         <div class="col-md-2">
             <button type="button" class="btn btn-primary w-100" onclick="applyFilters()">Search</button>
@@ -58,7 +98,91 @@
     </div>
 </div>
 
+<!-- Location Picker Modal -->
+<div id="locationModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeLocationPicker()">&times;</span>
+        <h2>Select a Location on the Map or Use Your Current Location</h2>
+        <button onclick="getCurrentLocation()">Use My Current Location</button>
+        <div id="map"></div>
+        <div id="info">Selected Location: <span id="location-info">None</span></div>
+        <button onclick="confirmLocation()">OK</button>
+    </div>
+</div>
+
 <script>
+    // Initialize the map and marker
+    let map, marker;
+
+    function initMap() {
+        map = L.map('map').setView([31.7917, -7.0926], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        marker = L.marker([31.7917, -7.0926], { draggable: true }).addTo(map);
+
+        map.on('click', function (e) {
+            let lat = e.latlng.lat;
+            let lng = e.latlng.lng;
+            marker.setLatLng([lat, lng]);
+            updateLocation(lat, lng);
+        });
+
+        marker.on('dragend', function (e) {
+            let position = marker.getLatLng();
+            updateLocation(position.lat, position.lng);
+        });
+    }
+
+    function updateLocation(lat, lng) {
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+            .then(response => response.json())
+            .then(data => {
+                let locationName = data.display_name || "Unknown Location";
+                document.getElementById("location-info").textContent = locationName;
+            })
+            .catch(() => {
+                document.getElementById("location-info").textContent = "Error retrieving location";
+            });
+    }
+
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    let lat = position.coords.latitude;
+                    let lng = position.coords.longitude;
+                    map.setView([lat, lng], 13);
+                    marker.setLatLng([lat, lng]);
+                    updateLocation(lat, lng);
+                },
+                () => {
+                    alert("Geolocation failed. Please enable location services.");
+                }
+            );
+        } else {
+            alert("Your browser does not support geolocation.");
+        }
+    }
+
+    function openLocationPicker() {
+        document.getElementById('locationModal').style.display = 'block';
+        if (!map) {
+            initMap();
+        }
+    }
+
+    function closeLocationPicker() {
+        document.getElementById('locationModal').style.display = 'none';
+    }
+
+    function confirmLocation() {
+        const selectedLocation = document.getElementById("location-info").textContent;
+        document.getElementById("locationFilter").value = selectedLocation;
+        closeLocationPicker();
+    }
+
     // Apply filters based on user input
     function applyFilters() {
         const universityFilter = document.getElementById("universityFilter").value.toLowerCase();
