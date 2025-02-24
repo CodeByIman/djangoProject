@@ -14,7 +14,14 @@ from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
 import os
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 load_dotenv()
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -75,8 +82,8 @@ ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

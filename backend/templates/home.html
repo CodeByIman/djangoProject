@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annonces Immobilières</title>
+    {% load static %}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <form class="filters-form" id="searchForm">
+            <div class="filter-group">
+                <label>Université:</label>
+                <input type="text" id="university">
+            </div>
+            
+            <div class="filter-group">
+                <label>Type de logement:</label>
+                <select id="propertyType">
+                    <option value="">Tous</option>
+                    <option value="room">Chambre</option>
+                    <option value="studio">Studio</option>
+                    <option value="apartment">Appartement</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Prix min:</label>
+                <input type="number" id="minPrice">
+            </div>
+
+            <div class="filter-group">
+                <label>Prix max:</label>
+                <input type="number" id="maxPrice">
+            </div>
+
+            <div class="filter-group">
+                <label>Emplacement:</label>
+                <input type="text" id="location" readonly>
+            </div>
+
+            <button type="button" onclick="openLocationPicker()">Choisir un emplacement</button>
+            <button type="submit">Rechercher</button>
+        </form>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <img src="{% static 'images/kk.jpg' %}" alt="Hero Image" class="hero-image">
+        <div class="overlay">
+            <h1>Search, explore and book your <span class="highlight">room!</span></h1>
+            <div class="search-bar">
+                <input type="text" placeholder="Search by city, university or property">
+                <button>🔍</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Picker Modal -->
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLocationPicker()">&times;</span>
+            <h2>Select a Location on the Map or Use Your Current Location</h2>
+            <button onclick="getCurrentLocation()">Use My Current Location</button>
+            <div id="map"></div>
+            <div id="info">Selected Location: <span id="location-info">None</span></div>
+            <button onclick="confirmLocation()">OK</button>
+        </div>
+    </div>
+
+    <!-- Logout Button -->
+    <button class="logout-btn" onclick="logout()">Déconnexion</button>
+
+    <!-- Listings Container -->
+    <div id="listingsContainer" class="listings-grid"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>

@@ -451,49 +451,100 @@ body {
             closeLocationPicker();
         }
 
+        // async function loadListings(filters = {}) {
+        //     try {
+        //         const params = new URLSearchParams(filters).toString();
+        //         console.log("Fetching listings with token:", accessToken); // Debugging
+
+        //         const response = await axios.get(`${API_URL}?${params}`, {
+        //             headers: {
+        //                 'Authorization': `Bearer ${accessToken}`
+        //             }
+        //         });
+
+        //         console.log("Response data:", response.data); // Debugging
+        //         displayListings(response.data);
+                
+        //     } catch (error) {
+        //         console.error("Error fetching listings:", error);
+                
+        //         if (error.response) {
+        //             console.log("Server response:", error.response.data);
+        //         }
+
+        //         if (error.response && error.response.status === 401) {
+        //             alert("Session expirée. Veuillez vous reconnecter.");
+        //             localStorage.removeItem('accessToken'); // Supprimer le token invalide
+        //             window.location.href = 'login.html'; // Rediriger vers la page de connexion
+        //         } else {
+        //             container.innerHTML = `<div class="error-message">Une erreur s'est produite.</div>`;
+        //         }
+        //     }
+        // }
+
+        // function displayListings(listings) {
+        //     container.innerHTML = listings.map(listing => `
+        //         <div class="listing-card">
+        //             <img src="image.jpg" class="listing-image" alt="${listing.title}">
+        //             <div class="listing-content">
+        //                 <h3>${listing.title}</h3>
+        //                 <div class="listing-price">${listing.price} €/mois</div>
+        //                 <button onclick="showDetail(${listing.id})">Voir détails</button>
+        //             </div>
+        //         </div>
+        //     `).join('');
+        // }
+
+
         async function loadListings(filters = {}) {
-            try {
-                const params = new URLSearchParams(filters).toString();
-                console.log("Fetching listings with token:", accessToken); // Debugging
+    try {
+        const params = new URLSearchParams(filters).toString();
+        console.log("Fetching listings with token:", accessToken); // Debugging
 
-                const response = await axios.get(`${API_URL}?${params}`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-
-                console.log("Response data:", response.data); // Debugging
-                displayListings(response.data);
-                
-            } catch (error) {
-                console.error("Error fetching listings:", error);
-                
-                if (error.response) {
-                    console.log("Server response:", error.response.data);
-                }
-
-                if (error.response && error.response.status === 401) {
-                    alert("Session expirée. Veuillez vous reconnecter.");
-                    localStorage.removeItem('accessToken'); // Supprimer le token invalide
-                    window.location.href = 'login.html'; // Rediriger vers la page de connexion
-                } else {
-                    container.innerHTML = `<div class="error-message">Une erreur s'est produite.</div>`;
-                }
+        const response = await axios.get(`${API_URL}?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
             }
+        });
+
+        console.log("Response data:", response.data); // Debugging
+        displayListings(response.data);
+        
+    } catch (error) {
+        console.error("Error fetching listings:", error);
+        
+        if (error.response) {
+            console.log("Server response:", error.response.data);
         }
 
-        function displayListings(listings) {
-            container.innerHTML = listings.map(listing => `
-                <div class="listing-card">
-                    <img src="image.jpg" class="listing-image" alt="${listing.title}">
-                    <div class="listing-content">
-                        <h3>${listing.title}</h3>
-                        <div class="listing-price">${listing.price} €/mois</div>
-                        <button onclick="showDetail(${listing.id})">Voir détails</button>
-                    </div>
-                </div>
-            `).join('');
+        if (error.response && error.response.status === 401) {
+            alert("Session expirée. Veuillez vous reconnecter.");
+            localStorage.removeItem('accessToken'); // Supprimer le token invalide
+            window.location.href = 'login.html'; // Rediriger vers la page de connexion
+        } else {
+            container.innerHTML = `<div class="error-message">Une erreur s'est produite.</div>`;
         }
+    }
+}
+
+function displayListings(listings) {
+    container.innerHTML = listings.map(listing => `
+        <div class="listing-card">
+            <img src="${listing.image ? `http://localhost:8000${listing.image}` : 'default_image.jpg'}" 
+                 class="listing-image" 
+                 alt="${listing.title}">
+            <div class="listing-content">
+                <h3>${listing.title}</h3>
+                <div class="listing-price">${listing.price} €/mois</div>
+                <button onclick="showDetail(${listing.id})">Voir détails</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+
+  
+
 
         function showDetail(id) {
             window.location.href = `detail.html?id=${id}`;

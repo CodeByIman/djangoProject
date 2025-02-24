@@ -26,11 +26,11 @@ class Listing(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     property_type = models.CharField(choices=PROPERTY_TYPES, max_length=20)
     location = models.CharField(max_length=255)
-    university = models.ForeignKey(University, on_delete=models.CASCADE, related_name="listings", null=True, blank=True)
+    university = models.CharField(max_length=255, null=True, blank=True)  # Now just a simple field
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    images = models.ImageField(upload_to='listing_images/', null=True, blank=True)  # Pour gérer les photos
+    images = models.ImageField(upload_to='listing_images/', null=True, blank=True)
 
     def __str__(self):
         return self.title

@@ -18,14 +18,15 @@ class UniversitySerializer(serializers.ModelSerializer):
         model = University
         fields = ['id', 'name', 'city']
 
+        
 class ListingSerializer(serializers.ModelSerializer):
-    images = serializers.ImageField(use_url=True) 
+    images = serializers.ImageField(use_url=True)
     seller = UserSerializer(read_only=True)
-    university = UniversitySerializer(read_only=True)
 
     class Meta:
         model = Listing
         fields = ['id', 'title', 'description', 'price', 'property_type', 'location', 'university', 'seller', 'created_at', 'updated_at', 'images']
+
 
 class ListingCreateSerializer(serializers.ModelSerializer):
     class Meta:
