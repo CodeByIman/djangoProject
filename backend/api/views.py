@@ -222,4 +222,4 @@ def listing_view(request):
     return render(request, "listing.html", {"listings": listings})
 
 def home(request):
-    return render(request, 'home.html', {'message': 'Template is working!'})
+    return render(request, 'api/home.html', {'message': 'Template is working!'})

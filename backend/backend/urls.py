@@ -18,16 +18,16 @@ from django.contrib import admin
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('register/', UserRegistrationView.as_view(), name='api_register'),  # Unique name
-    path('login/', LoginView.as_view(), name='api_login'),  # Unique name
+    # path('register/', UserRegistrationView.as_view(), name='api_register'),  # Unique name
+    # path('login/', LoginView.as_view(), name='api_login'),  # Unique name
     path('listings/', ListingListView.as_view(), name='listings'),
     path('listings/create/', ListingCreateView.as_view(), name='create_listing'),
     path('listings/<int:pk>/', ListingDetailView.as_view(), name='listing_detail'),
     path('listings/<int:pk>/edit/', ListingUpdateDeleteView.as_view(), name='edit_listing'),
-    path('', home, name='home'),
+    path('home/', home, name='home'),
     path('register/', register_page, name='register'),  # Unique name
     path('login/', login_page, name='login'),
-      path('listing/', listing_view, name='listing'),   # Template-based login
+      path('', listing_view, name='listing'),   # Template-based login
 ]
 
 # Serve media files during development

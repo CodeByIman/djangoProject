@@ -30,6 +30,8 @@ class Listing(models.Model):
     seller = models.ForeignKey(User, on_delete=models.CASCADE, related_name="listings")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    latitude = models.FloatField(default=0.0)  # Default value for latitude
+    longitude = models.FloatField(default=0.0)
     images = models.ImageField(upload_to='listing_images/', null=True, blank=True)
 
     def __str__(self):
