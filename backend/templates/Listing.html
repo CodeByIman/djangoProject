@@ -11,6 +11,7 @@
     <style>
         body {
       margin: 0;
+      background-color: #5d82a7;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
@@ -30,7 +31,7 @@
     }
 
     .navbar .login-button {
-      background-color: #3498DB;
+      background-color:#46607b ;
       color: #fff;
       padding: 0.5rem 1rem;
       border: none;
@@ -41,11 +42,11 @@
     }
 
     .navbar .login-button:hover {
-      background-color: #2980B9;
+      background-color: #34495E;
     }
         /* Hero Search Section */
         .hero-search {
-            background: url('{% static "images/hero.jpg" %}') no-repeat center center;
+            background: url('{% static "images/HeroIMG.jpg" %}') no-repeat center center;
             background-size: cover;
             color: white;
             min-height: 80vh; /* Full-screen height */
@@ -82,9 +83,20 @@
         /* Ensure input fields and buttons have consistent height */
         .form-control,
         .btn {
+            
             height: 40px !important; /* Fixed height for all inputs and buttons */
             line-height: 1.5 !important; /* Consistent line-height */
             font-size: 1rem !important; /* Ensure consistent font size */
+        }
+        .btn{
+            background-color: #46607b ;
+            border: none;
+        
+        }
+        .btn:hover{
+            background-color:  #34495E;
+            border: none;
+        
         }
 
         /* Responsive grid spacing */
@@ -165,10 +177,25 @@
 
         /* Ensure cards have consistent dimensions */
         .card {
-            height: 100%; /* Make cards fill their container */
-            display: flex;
-            flex-direction: column;
-        }
+    height: 100%; /* Make cards fill their container */
+    display: flex;
+    flex-direction: column;
+    background-color: #34495E;
+    color: #fff;
+    transition: box-shadow 0.2s ease, transform 0.2s ease; /* Shorter transition duration */
+}
+
+/* Hover effect */
+.card:hover {
+    transform: scale(1.05); /* Slightly scale the card up */
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.15); /* Smaller shadow */
+}
+
+/* Optional: Add a slight motion effect to the card */
+.card {
+    will-change: transform; /* Suggest to the browser to optimize for animations */
+}
+
 
         /* Ensure images have a consistent height and maintain aspect ratio */
         .card-img-top {
