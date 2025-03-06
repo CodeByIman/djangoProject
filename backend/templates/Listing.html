@@ -174,7 +174,6 @@
 }
 
        
-
         /* Ensure cards have consistent dimensions */
         .card {
     height: 100%; /* Make cards fill their container */
@@ -208,6 +207,142 @@
         .card-body {
             flex: 1; /* Allow the card body to grow and fill the remaining space */
         }
+        
+        /* Details button styles */
+        .details-btn {
+            background-color: #3498DB;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .details-btn:hover {
+            background-color: #2980B9;
+        }
+        
+        /* Listing details modal */
+        #listingDetailsModal {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        #listingDetailsModal .modal-content {
+            background-color: #fff;
+            color: #333;
+            padding: 20px;
+            max-width: 500px;
+            max-height: 80vh; /* Limit height to 80% of viewport height */
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            overflow-y: auto; /* Add scrollbar if content is too tall */
+            position: relative;
+        }
+        
+        .listing-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            position: sticky; /* Make header sticky */
+            top: 0;
+            background-color: #fff;
+            z-index: 5;
+        }
+        
+        .listing-details-image {
+            width: 100%;
+            height: 200px; /* Reduced height */
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-section {
+            margin-bottom: 15px;
+        }
+        
+        .detail-section h4 {
+            margin-bottom: 5px;
+            color: #2C3E50;
+        }
+        
+        .amenities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .amenity-tag {
+            background-color: #EBF5FB;
+            color: #3498DB;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+        
+        /* Contact button at the bottom */
+        .contact-btn-container {
+            position: sticky;
+            bottom: 0;
+            background-color: #fff;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+
+        .location-container {
+    position: relative;
+}
+.truncated {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.expanded {
+    white-space: normal;
+}
+.show-more-link {
+    display: inline-block;
+    margin-top: 5px;
+    color: #007bff;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.details-btn {
+    background-color: #46607b; /* Custom color */
+    color: white; /* Text color */
+    padding: 10px 20px; /* Add padding */
+    font-size: 16px; /* Adjust font size */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Round the edges */
+    cursor: pointer; /* Change cursor on hover */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.details-btn:hover {
+    background-color: #3b5068; /* Slightly darker shade on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+}
+
     </style>
 </head>
 <body>
@@ -265,6 +400,20 @@
                         <p class="card-text"><strong>Price:</strong> ${{ listing.price }}</p>
                         <p class="card-text"><strong>University:</strong> {{ listing.university }}</p>
                         <p class="card-text"><strong>Location:</strong> {{ listing.location }}</p>
+                        <button class="details-btn" 
+        onclick="showListingDetails(
+            '{{ listing.id }}', 
+            '{{ listing.title|escapejs }}', 
+            '{{ listing.price }}', 
+            '{{ listing.university|escapejs }}', 
+            '{{ listing.location|escapejs }}', 
+            '{% if listing.images %}{{ listing.images.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}', 
+            '{{ listing.description|escapejs }}', 
+            '{{ listing.room_type|escapejs }}', 
+            '{{ listing.bathrooms }}', 
+            '{{ listing.bedrooms }}', 
+            '{{ listing.amenities|escapejs }}'
+        )">More Details</button>
                     </div>
                 </div>
             </div>
@@ -275,18 +424,78 @@
     </div>
 
     <!-- Location Picker Modal -->
-   <!-- Location Picker Modal -->
-<div id="locationModal" class="modal">
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLocationPicker()">&times;</span>
+            <h2>Select a Location on the Map or Use Your Current Location</h2>
+            <button onclick="getCurrentLocation()">Use My Current Location</button>
+            <div id="map"></div>
+            <div id="info">Selected Location: <span id="location-info">None</span></div>
+            <button onclick="confirmLocation()">OK</button>
+        </div>
+    </div>
+
+   <!-- Listing Details Modal -->
+<div id="listingDetailsModal" class="modal">
     <div class="modal-content">
-        <span class="close" onclick="closeLocationPicker()">&times;</span>
-        <h2>Select a Location on the Map or Use Your Current Location</h2>
-        <button onclick="getCurrentLocation()">Use My Current Location</button>
-        <div id="map"></div>
-        <div id="info">Selected Location: <span id="location-info">None</span></div>
-        <button onclick="confirmLocation()">OK</button>
+        <div class="listing-details-header">
+            <h3 id="detailsTitle">Listing Title</h3>
+            <span class="close" onclick="closeListingDetails()">&times;</span>
+        </div>
+        <img id="detailsImage" class="listing-details-image" src="" alt="Listing Image">
+        
+        <div class="details-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="detail-section">
+                        <h4>Price</h4>
+                        <p id="detailsPrice">$0</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-section">
+                        <h4>Location</h4>
+                        <div class="location-container">
+                            <p id="detailsLocation" class="truncated">Location</p>
+                            <a href="#" class="show-more-link" onclick="toggleLocationText(event)">Show More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="detail-section">
+                        <h4>University</h4>
+                        <p id="detailsUniversity">University</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="detail-section">
+                        <h4>Room Details</h4>
+                        <p><span id="detailsRoomType">Room Type</span> | <span id="detailsBedrooms">0</span> Bed(s), <span id="detailsBathrooms">0</span> Bath(s)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="detail-section">
+                <h4>Description</h4>
+                <p id="detailsDescription">Description</p>
+            </div>
+            
+            <div class="detail-section">
+                <h4>Amenities</h4>
+                <div id="detailsAmenities" class="amenities-list">
+                    <!-- Amenities will be populated here -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="contact-btn-container">
+            <button class="btn btn-primary w-100" onclick="contactOwner()">Contact Owner</button>
+        </div>
     </div>
 </div>
-
     <script>
         // Initialize the map and marker
         let map, marker;
@@ -344,19 +553,19 @@
         }
 
         function openLocationPicker() {
-    const modal = document.getElementById('locationModal');
-    modal.style.display = 'flex'; // Use flex to center
-    modal.classList.add('active'); // Add active class for animation
-    if (!map) {
-        initMap();
-    }
-}
+            const modal = document.getElementById('locationModal');
+            modal.style.display = 'flex'; // Use flex to center
+            modal.classList.add('active'); // Add active class for animation
+            if (!map) {
+                initMap();
+            }
+        }
 
-function closeLocationPicker() {
-    const modal = document.getElementById('locationModal');
-    modal.style.display = 'none';
-    modal.classList.remove('active'); // Remove active class
-}
+        function closeLocationPicker() {
+            const modal = document.getElementById('locationModal');
+            modal.style.display = 'none';
+            modal.classList.remove('active'); // Remove active class
+        }
 
         function confirmLocation() {
             const selectedLocation = document.getElementById("location-info").textContent;
@@ -391,6 +600,85 @@ function closeLocationPicker() {
                 }
             });
         }
+        
+        // Listing Details Functionality
+        function showListingDetails(id, title, price, university, location, imageUrl, description, roomType, bathrooms, bedrooms, amenities) {
+            // Populate modal with listing details
+            document.getElementById("detailsTitle").textContent = title;
+            document.getElementById("detailsPrice").textContent = "$" + price;
+            document.getElementById("detailsLocation").textContent = location;
+            document.getElementById("detailsUniversity").textContent = university;
+            document.getElementById("detailsImage").src = imageUrl;
+            document.getElementById("detailsDescription").textContent = description || "No description available.";
+            document.getElementById("detailsRoomType").textContent = roomType || "Standard";
+            document.getElementById("detailsBathrooms").textContent = bathrooms || "1";
+            document.getElementById("detailsBedrooms").textContent = bedrooms || "1";
+            
+            // Display amenities as tags
+            const amenitiesContainer = document.getElementById("detailsAmenities");
+            amenitiesContainer.innerHTML = ""; // Clear previous amenities
+            
+            if (amenities && amenities.length > 0) {
+                const amenitiesList = amenities.split(',');
+                amenitiesList.forEach(amenity => {
+                    const tag = document.createElement("span");
+                    tag.className = "amenity-tag";
+                    tag.textContent = amenity.trim();
+                    amenitiesContainer.appendChild(tag);
+                });
+            } else {
+                amenitiesContainer.innerHTML = "<p>No amenities listed</p>";
+            }
+            
+            // Show the modal
+            const modal = document.getElementById("listingDetailsModal");
+            modal.style.display = "flex";
+            modal.classList.add("active");
+            
+            // Reset scroll position to top
+            modal.querySelector('.modal-content').scrollTop = 0;
+        }
+        
+        function closeListingDetails() {
+            const modal = document.getElementById("listingDetailsModal");
+            modal.style.display = "none";
+            modal.classList.remove("active");
+        }
+        
+        function contactOwner() {
+            alert("Contact feature will be implemented soon!");
+            // This is where you would implement your contact functionality
+        }
+        
+        // Close the modals if user clicks outside of the modal content
+        window.onclick = function(event) {
+            const locationModal = document.getElementById('locationModal');
+            const listingModal = document.getElementById('listingDetailsModal');
+            
+            if (event.target === locationModal) {
+                closeLocationPicker();
+            }
+            
+            if (event.target === listingModal) {
+                closeListingDetails();
+            }
+        }
+
+        function toggleLocationText(event) {
+    event.preventDefault();
+    const locationElement = document.getElementById('detailsLocation');
+    const linkElement = event.target;
+    
+    if (locationElement.classList.contains('truncated')) {
+        locationElement.classList.remove('truncated');
+        locationElement.classList.add('expanded');
+        linkElement.textContent = 'Show Less';
+    } else {
+        locationElement.classList.remove('expanded');
+        locationElement.classList.add('truncated');
+        linkElement.textContent = 'Show More';
+    }
+}
     </script>
 </body>
 </html>
