@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import authenticate, get_user_model,login
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import render, get_object_or_404 ,redirect
@@ -13,44 +13,86 @@ from .serializers import (
     UniversitySerializer,
     UserSerializer,
 )
+import logging
 
 User = get_user_model()  # Référence au modèle d'utilisateur personnalisé
 
+# Setup logger
+logger = logging.getLogger(__name__)
 
-# ✅ User Registration View
+# ✅ User Registration View with CSRF handling and enhanced error logging
 class UserRegistrationView(APIView):
     permission_classes = [permissions.AllowAny]  # Accessible sans authentification
+    
+    def get(self, request):
+        # Render the registration template for GET requests
+        return render(request, 'register.html')
 
     def post(self, request):
-        data = request.data
-        username = data.get("username")
-        password = data.get("password")
-        email = data.get("email")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        email = request.POST.get("email")
 
+        # Validation
         if not username or not password or not email:
-            return Response(
-                {"error": "Username, password, and email are required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            logger.error("Validation failed: Username, password, and email are required.")
+            return render(request, 'register.html', {"error": "Username, password, and email are required."})
 
         if User.objects.filter(username=username).exists():
-            return Response(
-                {"error": "Username already exists."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            logger.warning(f"Username '{username}' already exists.")
+            return render(request, 'register.html', {"error": "Username already exists."})
 
         try:
             validate_password(password)
         except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.error(f"Password validation failed: {str(e)}")
+            return render(request, 'register.html', {"error": str(e)})
 
-        user = User.objects.create_user(username=username, password=password, email=email)
-        user.save()
+        # Create the new user
+        try:
+            user = User.objects.create_user(username=username, password=password, email=email)
+            user.save()
+            logger.info(f"User '{username}' registered successfully.")
+        except Exception as e:
+            logger.error(f"Error creating user '{username}': {str(e)}")
+            return render(request, 'register.html', {"error": "An error occurred while creating the user. Please try again."})
 
-        return Response(
-            {"message": "User registered successfully!"},
-            status=status.HTTP_201_CREATED,
-        )
+        # If successful, render success message or redirect to login
+        return redirect('/login')  # Redirect to login page after successful registration
+# # ✅ User Registration View
+# class UserRegistrationView(APIView):
+#     permission_classes = [permissions.AllowAny]  # Accessible sans authentification
+
+#     def post(self, request):
+#         data = request.data
+#         username = data.get("username")
+#         password = data.get("password")
+#         email = data.get("email")
+
+#         if not username or not password or not email:
+#             return Response(
+#                 {"error": "Username, password, and email are required."},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         if User.objects.filter(username=username).exists():
+#             return Response(
+#                 {"error": "Username already exists."},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         try:
+#             validate_password(password)
+#         except ValidationError as e:
+#             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+#         user = User.objects.create_user(username=username, password=password, email=email)
+#         user.save()
+
+#         return Response(
+#             {"message": "User registered successfully!"},
+#             status=status.HTTP_201_CREATED,
+#         )
  
 def register_page(request):
     if request.method == "POST":
@@ -99,25 +141,76 @@ def register_page(request):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
-
+    
+    def get(self, request):
+        # Render the login template for GET requests
+        return render(request, 'login.html')
+    
     def post(self, request):
-        username = request.data.get("username") if request.content_type == 'application/json' else request.POST.get("username")
-        password = request.data.get("password") if request.content_type == 'application/json' else request.POST.get("password")
-
+        # Try to get username/password from POST data (form submission)
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        
+        # If not in POST, try to parse from request body (axios JSON)
+        if not username or not password:
+            try:
+                data = json.loads(request.body)
+                username = data.get("username")
+                password = data.get("password")
+            except:
+                pass
+        
+        # Authenticate user
         user = authenticate(username=username, password=password)
         if not user:
-            error_message = {"error": "Invalid credentials"}
-            return Response(error_message, status=status.HTTP_401_UNAUTHORIZED) if request.content_type == 'application/json' else render(request, 'api/login.html', error_message)
-
+            # Return the template with error message
+            return render(request, 'login.html', {'error': 'Invalid credentials, please try again.'})
+        
+        # Log the user in (this sets the session)
+        login(request, user)
+        
         # Generate JWT tokens
         refresh = RefreshToken.for_user(user)
         access_token = str(refresh.access_token)
+        
+        # Store the token in session
+        request.session['access_token'] = access_token
+        
+        # Store user information in session
+        request.session['user_info'] = {
+            'username': user.username,
+            'email': user.email,
+            'id': user.id,
+        }
+        
+        # Save the session explicitly
+        request.session.save()
+        
+        # Redirect to home page
+        return redirect('/home')    
 
-        if request.content_type == 'application/json':
-            return Response({"refresh": str(refresh), "access": access_token}, status=status.HTTP_200_OK)
-        else:
-            request.session['access_token'] = access_token
-            return redirect('/')  # Redirect to home page
+    
+# class LoginView(APIView):
+#     permission_classes = [permissions.AllowAny]
+
+#     def post(self, request):
+#         username = request.data.get("username") if request.content_type == 'application/json' else request.POST.get("username")
+#         password = request.data.get("password") if request.content_type == 'application/json' else request.POST.get("password")
+
+#         user = authenticate(username=username, password=password)
+#         if not user:
+#             error_message = {"error": "Invalid credentials"}
+#             return Response(error_message, status=status.HTTP_401_UNAUTHORIZED) if request.content_type == 'application/json' else render(request, 'api/login.html', error_message)
+
+#         # Generate JWT tokens
+#         refresh = RefreshToken.for_user(user)
+#         access_token = str(refresh.access_token)
+
+#         if request.content_type == 'application/json':
+#             return Response({"refresh": str(refresh), "access": access_token}, status=status.HTTP_200_OK)
+#         else:
+#             request.session['access_token'] = access_token
+#             return redirect('/')  # Redirect to home page
 
 def login_page(request):
     return render(request, 'login.html')
@@ -144,6 +237,52 @@ def login_page(request):
 #             queryset = queryset.filter(property_type=property_type)
 
 #         return queryset
+
+class LogoutView(APIView):
+    def get(self, request):
+        # Clear the session
+        request.session.flush()
+        
+        # Redirect to login page
+        return redirect('/login')
+    
+
+from rest_framework.views import APIView
+from django.shortcuts import render, redirect
+import logging
+
+logger = logging.getLogger(__name__)
+
+class HomePageView(APIView):
+    def get(self, request):
+        # Check if user is logged in
+        if not request.user.is_authenticated:
+            logger.warning("User not authenticated, redirecting to login")
+            return redirect('/login')
+            
+        # Get user info from session or user object
+        user_info = request.session.get('user_info')
+        
+        # If session doesn't have user_info, create it from user object
+        if not user_info:
+            logger.info("Recreating user_info in session")
+            user_info = {
+                'username': request.user.username,
+                'email': request.user.email,
+                'id': request.user.id,
+            }
+            request.session['user_info'] = user_info
+            request.session.save()
+        
+        # Debug logging
+        logger.debug(f"Access Token: {request.session.get('access_token')}")
+        logger.debug(f"User Info: {user_info}")
+            
+        # Render home page with user info
+        return render(request, 'home.html', {'user': user_info})    
+
+
+
 class ListingListView(generics.ListAPIView):
     serializer_class = ListingSerializer
     permission_classes = [permissions.AllowAny]
@@ -222,4 +361,4 @@ def listing_view(request):
     return render(request, "listing.html", {"listings": listings})
 
 def home(request):
-    return render(request, 'api/home.html', {'message': 'Template is working!'})
+    return render(request, 'home.html', {'message': 'Template is working!'})

@@ -167,9 +167,10 @@ AUTH_USER_MODEL = 'api.User'
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all origins in development
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # For development frontend
-    "https://your-production-domain.com",  # Update for production
+    "http://localhost:8000",  # For development frontend
+    "http://127.0.0.1:8000",  # Update for production
 ]
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = True
 
 

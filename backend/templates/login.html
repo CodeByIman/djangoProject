@@ -46,46 +46,91 @@
             color: white;
             display: none;
         }
+        .register-link {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-color);
+        }
+        .register-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h1 class="text-center">Login</h1>
-        <form id="loginForm">
+        <form id="loginForm" method="post" action="/login/">
             <div class="mb-3">
                 <label class="form-label">Username:</label>
-                <input type="text" id="username" required class="form-control" placeholder="Enter username">
+                <input type="text" id="username" name="username" required class="form-control" placeholder="Enter username">
             </div>
             <div class="mb-3">
                 <label class="form-label">Password:</label>
-                <input type="password" id="password" required class="form-control" placeholder="Enter password">
+                <input type="password" id="password" name="password" required class="form-control" placeholder="Enter password">
             </div>
+            <!-- Add CSRF token field -->
+            <input type="hidden" name="csrfmiddlewaretoken" id="csrftoken">
             <button type="submit" class="btn btn-primary w-100">Login</button>
         </form>
         <div id="errorMessage" class="alert alert-danger mt-3 text-center">
             Invalid credentials, please try again.
         </div>
+        <div class="register-link">
+            Don't have an account? <a href="/register/">Register here</a>
+        </div>
     </div>
 
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const formData = {
-                username: document.getElementById('username').value.trim(),
-                password: document.getElementById('password').value.trim(),
-            };
-
-            try {
-                const response = await axios.post('http://localhost:8000/api/login/', formData);
-                if (response.status === 200) {
-                    window.location.href = '/'; // Redirect to home page on success
+        // Function to get cookie by name
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
                 }
-            } catch (error) {
+            }
+            return cookieValue;
+        }
+
+        // Set CSRF token
+        document.getElementById('csrftoken').value = getCookie('csrftoken');
+        
+        // Configure axios to always send cookies with requests
+        axios.defaults.withCredentials = true;
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('username', document.getElementById('username').value.trim());
+            formData.append('password', document.getElementById('password').value.trim());
+            formData.append('csrfmiddlewaretoken', document.getElementById('csrftoken').value);
+            
+            // Using the traditional form submission to ensure Django's session handling works properly
+            axios.post('/login/', formData, {
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
+            .then(function(response) {
+                // Redirect the browser to the home page
+                window.location.href = '/home/';
+            })
+            .catch(function(error) {
                 const errorMessage = document.getElementById('errorMessage');
                 errorMessage.style.display = 'block';
-                errorMessage.textContent = 'Invalid credentials, please try again.';
-            }
+                errorMessage.textContent = error.response?.data?.error || 'Invalid credentials, please try again.';
+            });
         });
     </script>
 </body>
