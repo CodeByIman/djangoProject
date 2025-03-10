@@ -299,6 +299,7 @@
                         <p class="option-description">
                             Have a room available near a university? Create a listing to reach thousands of students looking for accommodation. Set your own terms and connect directly with interested renters.
                         </p>
+                    <h1></h1>
                         <div class="card-footer">
                             <a href="/listings/create/" class="btn btn-action">Create Listing</a>
                         </div>
@@ -309,6 +310,26 @@
     </div>
 
     <!-- Bootstrap JS with Popper for dropdown functionality -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+
+document.querySelector('.btn-custom').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Use GET request instead of axios, since we're using session auth
+    window.location.href = '/listings/create/';
+});
+
+// axios.interceptors.request.use(function (config) {
+//     // Get token from wherever it's stored (cookies, localStorage, etc.)
+//     const token = document.cookie.split('; ')
+//       .find(row => row.startsWith('auth_token='))
+//       ?.split('=')[1];
+      
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   });
+    </script>
 </body>
 </html>

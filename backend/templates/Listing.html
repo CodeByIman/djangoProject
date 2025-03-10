@@ -342,13 +342,30 @@
     background-color: #3b5068; /* Slightly darker shade on hover */
     transform: scale(1.05); /* Slight zoom effect */
 }
+:root {
+    --primary-color: #FFD700;
+    --background-color: #5d82a7;
+            --card-background: #34495E;
+            --text-color: #E0E0E0;
+            --hover-color: #e6c200;
+            --card-hover-bg: #3d5a7d;
+}
+
+.navbar-brand {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .navbar-brand:hover {
+            color: var(--hover-color);
+        }
 
     </style>
 </head>
 <body>
     <div class="custom-container mt-4">
         <nav class="navbar">
-            <div class="logo">NearUniv</div>
+            <a class="navbar-brand" href="/">RoomFinder</a>
             <a href="http://127.0.0.1:8000/login" class="login-button">Login</a>
           </nav>
         <!-- Hero Search Section -->

@@ -1,4 +1,5 @@
 from rest_framework.views import APIView
+from django.views import View
 from rest_framework.response import Response
 from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -14,6 +15,11 @@ from .serializers import (
     UserSerializer,
 )
 import logging
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
 User = get_user_model()  # Référence au modèle d'utilisateur personnalisé
 
@@ -138,27 +144,16 @@ def register_page(request):
 #             )
 #         return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 
-
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
     
     def get(self, request):
-        # Render the login template for GET requests
         return render(request, 'login.html')
     
     def post(self, request):
         # Try to get username/password from POST data (form submission)
         username = request.POST.get("username")
         password = request.POST.get("password")
-        
-        # If not in POST, try to parse from request body (axios JSON)
-        if not username or not password:
-            try:
-                data = json.loads(request.body)
-                username = data.get("username")
-                password = data.get("password")
-            except:
-                pass
         
         # Authenticate user
         user = authenticate(username=username, password=password)
@@ -186,9 +181,14 @@ class LoginView(APIView):
         # Save the session explicitly
         request.session.save()
         
-        # Redirect to home page
-        return redirect('/home')    
-
+        # Return JSON response for axios or redirect for form submit
+        if request.content_type == 'application/json' or 'multipart/form-data' in request.content_type:
+            return JsonResponse({
+                'success': True,
+                'redirect': '/home/'
+            })
+        else:
+            return redirect('/home/')
     
 # class LoginView(APIView):
 #     permission_classes = [permissions.AllowAny]
@@ -317,14 +317,41 @@ class ListingListView(generics.ListAPIView):
 
 def listing_view(request):
     return render(request, "listing.html") 
-    
-# ✅ Add a listing (for authenticated users)
-class ListingCreateView(generics.CreateAPIView):
-    serializer_class = ListingCreateSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(seller=self.request.user)
+
+
+class ListingCreateView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        # The middleware will handle setting the JWT token from session
+        
+        if not request.user.is_authenticated:
+            return redirect('/login')
+
+        user_info = request.session.get('user_info', {
+            'username': request.user.username,
+            'email': request.user.email,
+            'id': request.user.id,
+        })
+        
+        return render(request, 'create.html', {'user': user_info})
+        
+    def post(self, request):
+        # Handle your create listing logic here
+        serializer = ListingCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(seller=request.user)
+            return redirect('/home')
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def check_auth(request):
+    return Response({'authenticated': True})
+
 
 
 # ✅ Listing details

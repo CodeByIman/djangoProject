@@ -16,16 +16,21 @@ from api.views import (
     LoginView,
     LogoutView,
     HomePageView,
+    check_auth,
 
 )
+
 from django.contrib import admin
 
 urlpatterns = [
+
+    path('api/check-auth/', check_auth, name='check-auth'),
     path('admin/', admin.site.urls),
     path('register/', UserRegistrationView.as_view(), name='api_register'),  # Unique name
     # path('login/', LoginView.as_view(), name='api_login'),  # Unique name
     path('listings/', ListingListView.as_view(), name='listings'),
     path('listings/create/', ListingCreateView.as_view(), name='create_listing'),
+    
     path('listings/<int:pk>/', ListingDetailView.as_view(), name='listing_detail'),
     path('listings/<int:pk>/edit/', ListingUpdateDeleteView.as_view(), name='edit_listing'),
     path('home/', home, name='home'),
